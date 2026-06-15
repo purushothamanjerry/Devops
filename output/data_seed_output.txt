@@ -1,0 +1,26 @@
+
+PLAY [Seed 1000 keys into Redis Cluster] ***************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [redis-node-1]
+
+TASK [Create seed script] ******************************************************
+ok: [redis-node-1]
+
+TASK [Run seed script] *********************************************************
+changed: [redis-node-1]
+
+TASK [Print seed result] *******************************************************
+ok: [redis-node-1] => {
+    "msg": "\n=== Seed Summary ===\nTotal inserted : 1000/1000\nFailed         : 0\n\nDistribution across masters:\n  10.10.0.11:6379 -> 333 keys\n  10.10.0.12:6379 -> 324 keys\n  10.10.0.13:6379 -> 343 keys"
+}
+
+PLAY RECAP *********************************************************************
+redis-node-1               : ok=4    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Checking prerequisites...
+  ✓ podman version 3.4.4 found
+  ✓ ansible-playbook 2.10.8 found
+  Proceeding...
+
+Seeding 1000 keys...

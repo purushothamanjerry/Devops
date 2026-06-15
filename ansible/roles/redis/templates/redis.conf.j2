@@ -1,0 +1,11 @@
+bind {{ redis_bind }}
+port {{ redis_port }}
+daemonize no
+loglevel notice
+logfile {{ redis_log_file }}
+dir {{ redis_dir }}
+cluster-enabled {{ 'yes' if redis_cluster_enabled else 'no' }}
+cluster-config-file {{ redis_cluster_config_file }}
+cluster-node-timeout {{ redis_cluster_node_timeout }}
+appendonly yes
+protected-mode no

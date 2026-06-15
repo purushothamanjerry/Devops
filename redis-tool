@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+
+import argparse
+import subprocess
+import sys
+import os
+import shutil
+
+ANSIBLE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ansible")
+INVENTORY = os.path.join(ANSIBLE_DIR, "inventory/hosts.ini")
+PLAYBOOKS = os.path.join(ANSIBLE_DIR, "playbooks")
+SSH_KEY = os.path.expanduser("~/.ssh/id_rsa")
+
+def check_prerequisites():
+    print("Checking prerequisites...")
+    ok = True
+    if shutil.which("podman"):
+        r = subprocess.run(["podman", "--version"], capture_output=True, text=True)
+        print(f"  ✓ {r.stdout.strip()} found")
+    elif shutil.which("docker"):
+        r = subprocess.run(["docker", "--version"], capture_output=True, text=True)
+        print(f"  ✓ {r.stdout.strip()} found")
+    else:
+        print("  ✗ Container runtime not found (Docker or Podman)")
+        print("    Install Podman: https://podman.io/docs/installation")
+        print("    Install Docker: https://docs.docker.com/engine/install/")
+        ok = False
+    if shutil.which("ansible-playbook"):
+        r = subprocess.run(["ansible-playbook", "--version"], capture_output=True, text=True)
+        print(f"  ✓ {r.stdout.split(chr(10))[0]} found")
+    else:
+        print("  ✗ Ansible not found")
+        print("    Install: pip install ansible")
+        ok = False
+    if not ok:
+        print("\nPlease install missing dependencies and retry.")
+        sys.exit(1)
+    print("  Proceeding...\n")
+
+def run_playbook(playbook, extra_vars=None):
+    cmd = [
+        "ansible-playbook",
+        "-i", INVENTORY,
+        os.path.join(PLAYBOOKS, playbook),
+        "--private-key", SSH_KEY,
+        "-u", "root"
+    ]
+    if extra_vars:
+        for k, v in extra_vars.items():
+            cmd += ["-e", f"{k}={v}"]
+    result = subprocess.run(cmd)
+    if result.returncode != 0:
+        print(f"\n[ERROR] Playbook {playbook} failed!")
+        sys.exit(1)
+
+def main():
+    check_prerequisites()
+    parser = argparse.ArgumentParser(prog="redis-tool")
+    subparsers = parser.add_subparsers(dest="command")
+
+    p = subparsers.add_parser("provision")
+    p.add_argument("--version", required=True)
+    p.add_argument("--masters", type=int, default=3)
+    p.add_argument("--replicas-per-master", type=int, default=1)
+
+    subparsers.add_parser("status")
+
+    data = subparsers.add_parser("data")
+    data_sub = data.add_subparsers(dest="data_command")
+    seed = data_sub.add_parser("seed")
+    seed.add_argument("--keys", type=int, default=1000)
+    data_sub.add_parser("verify")
+
+    u = subparsers.add_parser("upgrade")
+    u.add_argument("--target-version", required=True)
+    u.add_argument("--strategy", default="rolling")
+
+    v = subparsers.add_parser("verify")
+    v.add_argument("--full", action="store_true")
+
+    args = parser.parse_args()
+
+    if args.command == "provision":
+        print(f"Provisioning Redis Cluster v{args.version}...")
+        run_playbook("provision.yml", {"redis_version": args.version})
+    elif args.command == "status":
+        print("Fetching cluster status...")
+        run_playbook("status.yml")
+    elif args.command == "data":
+        if args.data_command == "seed":
+            print(f"Seeding {args.keys} keys...")
+            run_playbook("seed.yml")
+        elif args.data_command == "verify":
+            print("Verifying data...")
+            run_playbook("verify.yml")
+    elif args.command == "upgrade":
+        print(f"Upgrading to v{args.target_version}...")
+        run_playbook("upgrade.yml", {"target_version": args.target_version})
+    elif args.command == "verify":
+        print("Running full verification...")
+        run_playbook("full_verify.yml")
+    else:
+        parser.print_help()
+
+if __name__ == "__main__":
+    main()

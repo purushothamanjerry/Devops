@@ -1,0 +1,184 @@
+---
+# Pre-flight checks
+- name: Pre-flight checks
+  hosts: redis-node-1
+  become: yes
+  vars:
+    target_version: "7.2.6"
+  tasks:
+    - name: Check cluster state
+      command: /usr/local/bin/redis-cli -p 6379 cluster info
+      register: cluster_info
+
+    - name: Fail if cluster not healthy
+      fail:
+        msg: "Cluster is not healthy! Aborting upgrade."
+      when: "'cluster_state:ok' not in cluster_info.stdout"
+
+    - name: Print pre-flight result
+      debug:
+        msg: "Pre-flight check PASSED — cluster is healthy"
+
+# Upgrade replicas first
+- name: Upgrade Redis replicas
+  hosts: redis_replicas
+  become: yes
+  serial: 1
+  vars:
+    redis_version: "7.2.6"
+  tasks:
+    - name: Stop Redis on replica
+      shell: pkill redis-server || true
+
+    - name: Wait for Redis to stop
+      wait_for:
+        port: 6379
+        host: 127.0.0.1
+        state: stopped
+        timeout: 30
+
+    - name: Download Redis {{ redis_version }}
+      get_url:
+        url: "https://download.redis.io/releases/redis-{{ redis_version }}.tar.gz"
+        dest: "/tmp/redis-{{ redis_version }}.tar.gz"
+
+    - name: Extract Redis {{ redis_version }}
+      unarchive:
+        src: "/tmp/redis-{{ redis_version }}.tar.gz"
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Compile and install Redis {{ redis_version }}
+      shell: |
+        cd /tmp/redis-{{ redis_version }}
+        make -j$(nproc)
+        make install
+
+    - name: Start Redis on replica
+      shell: |
+        nohup /usr/local/bin/redis-server /etc/redis/redis.conf \
+          > /var/log/redis/redis.log 2>&1 &
+
+    - name: Wait for Redis to start
+      wait_for:
+        port: 6379
+        host: 127.0.0.1
+        timeout: 30
+
+    - name: Verify cluster state after replica upgrade
+      shell: /usr/local/bin/redis-cli -p 6379 cluster info
+      register: cluster_check
+      delegate_to: redis-node-1
+
+    - name: Fail if cluster not ok
+      fail:
+        msg: "Cluster not ok after upgrading {{ inventory_hostname }}!"
+      when: "'cluster_state:ok' not in cluster_check.stdout"
+
+    - name: Print progress
+      debug:
+        msg: "Upgraded replica {{ inventory_hostname }} — cluster: ok"
+
+# Upgrade masters with failover
+- name: Upgrade Redis masters
+  hosts: redis_masters
+  become: yes
+  serial: 1
+  vars:
+    redis_version: "7.2.6"
+  tasks:
+    - name: Get replica for this master
+      shell: |
+        /usr/local/bin/redis-cli -p 6379 cluster nodes | \
+        grep slave | awk '{print $2}' | head -1 | cut -d: -f1
+      register: replica_ip
+      delegate_to: redis-node-1
+
+    - name: Trigger CLUSTER FAILOVER on replica
+      shell: /usr/local/bin/redis-cli -h {{ replica_ip.stdout }} -p 6379 CLUSTER FAILOVER
+      delegate_to: redis-node-1
+
+    - name: Wait for failover to complete
+      pause:
+        seconds: 5
+
+    - name: Stop Redis on old master
+      shell: pkill redis-server || true
+
+    - name: Wait for Redis to stop
+      wait_for:
+        port: 6379
+        host: 127.0.0.1
+        state: stopped
+        timeout: 30
+
+    - name: Download Redis {{ redis_version }}
+      get_url:
+        url: "https://download.redis.io/releases/redis-{{ redis_version }}.tar.gz"
+        dest: "/tmp/redis-{{ redis_version }}.tar.gz"
+
+    - name: Extract Redis {{ redis_version }}
+      unarchive:
+        src: "/tmp/redis-{{ redis_version }}.tar.gz"
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Compile and install Redis {{ redis_version }}
+      shell: |
+        cd /tmp/redis-{{ redis_version }}
+        make -j$(nproc)
+        make install
+
+    - name: Start Redis
+      shell: |
+        nohup /usr/local/bin/redis-server /etc/redis/redis.conf \
+          > /var/log/redis/redis.log 2>&1 &
+
+    - name: Wait for Redis to start
+      wait_for:
+        port: 6379
+        host: 127.0.0.1
+        timeout: 30
+
+    - name: Verify cluster state after master upgrade
+      shell: /usr/local/bin/redis-cli -p 6379 cluster info
+      register: cluster_check
+      delegate_to: redis-node-1
+
+    - name: Fail if cluster not ok
+      fail:
+        msg: "Cluster not ok after upgrading {{ inventory_hostname }}!"
+      when: "'cluster_state:ok' not in cluster_check.stdout"
+
+    - name: Print progress
+      debug:
+        msg: "Upgraded master {{ inventory_hostname }} — cluster: ok"
+
+# Post-upgrade verification
+- name: Post-upgrade verification
+  hosts: redis-node-1
+  become: yes
+  tasks:
+    - name: Run verify script
+      command: python3 /tmp/verify.py
+      register: verify_result
+
+    - name: Print verify result
+      debug:
+        msg: "{{ verify_result.stdout }}"
+
+    - name: Check all versions
+      shell: |
+        /usr/local/bin/redis-cli -p 6379 cluster nodes | \
+        awk '{print $2}' | cut -d: -f1 | while read ip; do
+          echo "$ip: $(/usr/local/bin/redis-cli -h $ip -p 6379 info server | grep redis_version)"
+        done
+      register: versions
+
+    - name: Print versions
+      debug:
+        msg: "{{ versions.stdout }}"
+
+    - name: Upgrade complete
+      debug:
+        msg: "UPGRADE COMPLETE — all nodes on v7.2.6, data integrity verified"

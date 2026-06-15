@@ -1,0 +1,35 @@
+
+PLAY [Full Verification] *******************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [redis-node-1]
+
+TASK [Check 1 - Data integrity] ************************************************
+changed: [redis-node-1]
+
+TASK [Check 2 - Version consistency] *******************************************
+changed: [redis-node-1]
+
+TASK [Check 3 - Topology health] ***********************************************
+changed: [redis-node-1]
+
+TASK [Check 4 - Cluster state] *************************************************
+changed: [redis-node-1]
+
+TASK [Check 5 - Replication lag] ***********************************************
+changed: [redis-node-1]
+
+TASK [Print full verification report] ******************************************
+ok: [redis-node-1] => {
+    "msg": "==========================================\nFULL VERIFICATION REPORT\n==========================================\n\nCHECK 1 - Data Integrity:\n\n=== Verify Summary ===\nPASS — 1000/1000 keys verified\n\nCHECK 2 - Version Consistency:\nredis_version:7.2.6\r\nredis_version:7.2.6\r\nredis_version:7.2.6\r\nredis_version:7.2.6\r\nredis_version:7.2.6\r\nredis_version:7.2.6\n\nCHECK 3 - Topology Health:\ncluster_slots_assigned:16384\n\nCHECK 4 - Cluster State:\ncluster_state:ok\n\nCHECK 5 - Replication Lag:\n10.10.0.13: master_link_status:up\r\n10.10.0.16: master_link_status:up\r\n10.10.0.15: master_link_status:up\n\n==========================================\n"
+}
+
+PLAY RECAP *********************************************************************
+redis-node-1               : ok=7    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Checking prerequisites...
+  ✓ podman version 3.4.4 found
+  ✓ ansible-playbook 2.10.8 found
+  Proceeding...
+
+Running full verification...
