@@ -1,0 +1,14 @@
+# SSH keys - NEVER commit these!
+infra/authorized_keys
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+
+# Python
+__pycache__/
+*.pyc
+
+# Temp files
+*.old
+*.tmp

@@ -1,0 +1,56 @@
+---
+- name: Full Verification
+  hosts: redis-node-1
+  become: yes
+  tasks:
+    - name: Check 1 - Data integrity
+      command: python3 /tmp/verify.py
+      register: data_verify
+
+    - name: Check 2 - Version consistency
+      shell: |
+        /usr/local/bin/redis-cli -p 6379 cluster nodes | \
+        awk '{print $2}' | cut -d: -f1 | while read ip; do
+          /usr/local/bin/redis-cli -h $ip -p 6379 info server | grep redis_version
+        done
+      register: versions
+
+    - name: Check 3 - Topology health
+      shell: /usr/local/bin/redis-cli -p 6379 cluster info | grep cluster_slots_assigned
+      register: slots
+
+    - name: Check 4 - Cluster state
+      shell: /usr/local/bin/redis-cli -p 6379 cluster info | grep cluster_state
+      register: cluster_state
+
+    - name: Check 5 - Replication lag
+      shell: |
+        /usr/local/bin/redis-cli -p 6379 cluster nodes | \
+        grep slave | awk '{print $2}' | cut -d: -f1 | while read ip; do
+          echo "$ip: $(/usr/local/bin/redis-cli -h $ip -p 6379 info replication | grep master_link_status)"
+        done
+      register: replication
+
+    - name: Print full verification report
+      debug:
+        msg: |
+          ==========================================
+          FULL VERIFICATION REPORT
+          ==========================================
+
+          CHECK 1 - Data Integrity:
+          {{ data_verify.stdout }}
+
+          CHECK 2 - Version Consistency:
+          {{ versions.stdout }}
+
+          CHECK 3 - Topology Health:
+          {{ slots.stdout }}
+
+          CHECK 4 - Cluster State:
+          {{ cluster_state.stdout }}
+
+          CHECK 5 - Replication Lag:
+          {{ replication.stdout }}
+
+          ==========================================
