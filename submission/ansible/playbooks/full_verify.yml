@@ -1,0 +1,154 @@
+---
+- name: Full Verification
+  hosts: redis-node-1
+  become: yes
+  tasks:
+    - name: Deploy full verify script
+      copy:
+        dest: /tmp/full_verify.py
+        content: |
+          import subprocess
+          import hashlib
+
+          def redis_cmd(*args):
+              r = subprocess.run(
+                  ['/usr/local/bin/redis-cli'] + list(args),
+                  capture_output=True, text=True
+              )
+              return r.stdout.strip()
+
+          results = []
+
+          # --- CHECK 1: Data integrity ---
+          missing = 0
+          mismatched = 0
+          verified = 0
+          for i in range(1, 1001):
+              key = f"key:{i:04d}"
+              expected = hashlib.sha256(key.encode()).hexdigest()
+              result = subprocess.run(
+                  ['/usr/local/bin/redis-cli', '-c', '-p', '6379', 'GET', key],
+                  capture_output=True, text=True
+              )
+              actual = result.stdout.strip()
+              if not actual:
+                  missing += 1
+              elif actual != expected:
+                  mismatched += 1
+              else:
+                  verified += 1
+
+          if missing == 0 and mismatched == 0:
+              results.append(f"CHECK 1 — Data Integrity:     PASS ({verified}/1000 keys verified)")
+          else:
+              results.append(f"CHECK 1 — Data Integrity:     FAIL ({missing} missing, {mismatched} mismatched)")
+
+          # --- CHECK 2: Version consistency ---
+          nodes_raw = redis_cmd('-p', '6379', 'cluster', 'nodes')
+          versions = set()
+          version_details = []
+          for line in nodes_raw.strip().splitlines():
+              parts = line.split()
+              if len(parts) < 2:
+                  continue
+              addr = parts[1].split('@')[0]
+              ip = addr.split(':')[0]
+              port = addr.split(':')[1]
+              info = redis_cmd('-h', ip, '-p', port, 'info', 'server')
+              for v in info.splitlines():
+                  if v.startswith('redis_version:'):
+                      ver = v.split(':')[1].strip()
+                      versions.add(ver)
+                      version_details.append(f"    {addr}: v{ver}")
+
+          if len(versions) == 1:
+              results.append(f"CHECK 2 — Version Consistency: PASS (all nodes on v{versions.pop()})")
+          else:
+              results.append(f"CHECK 2 — Version Consistency: FAIL (versions: {', '.join(versions)})")
+          for d in version_details:
+              results.append(d)
+
+          # --- CHECK 3: Topology health ---
+          cluster_info = redis_cmd('-p', '6379', 'cluster', 'info')
+          slots_assigned = 0
+          for line in cluster_info.splitlines():
+              if line.startswith('cluster_slots_assigned:'):
+                  slots_assigned = int(line.split(':')[1].strip())
+
+          master_count = 0
+          masters_with_replicas = 0
+          master_ids = set()
+          replica_master_ids = set()
+
+          for line in nodes_raw.strip().splitlines():
+              parts = line.split()
+              if len(parts) < 4:
+                  continue
+              flags = parts[2]
+              if 'master' in flags and 'slave' not in flags:
+                  master_count += 1
+                  master_ids.add(parts[0])
+              elif 'slave' in flags:
+                  replica_master_ids.add(parts[3])
+
+          masters_with_replicas = len(master_ids & replica_master_ids)
+
+          if slots_assigned == 16384 and masters_with_replicas == master_count:
+              results.append(f"CHECK 3 — Topology Health:     PASS (16384/16384 slots, {master_count} masters each with ≥1 replica)")
+          else:
+              results.append(f"CHECK 3 — Topology Health:     FAIL (slots: {slots_assigned}/16384, masters with replicas: {masters_with_replicas}/{master_count})")
+
+          # --- CHECK 4: Cluster state ---
+          state = 'unknown'
+          for line in cluster_info.splitlines():
+              if line.startswith('cluster_state:'):
+                  state = line.split(':')[1].strip()
+
+          if state == 'ok':
+              results.append(f"CHECK 4 — Cluster State:       PASS (cluster_state:ok)")
+          else:
+              results.append(f"CHECK 4 — Cluster State:       FAIL (cluster_state:{state})")
+
+          # --- CHECK 5: Replication lag ---
+          all_up = True
+          repl_details = []
+          for line in nodes_raw.strip().splitlines():
+              parts = line.split()
+              if len(parts) < 3:
+                  continue
+              flags = parts[2]
+              if 'slave' in flags:
+                  addr = parts[1].split('@')[0]
+                  ip = addr.split(':')[0]
+                  port = addr.split(':')[1]
+                  repl_info = redis_cmd('-h', ip, '-p', port, 'info', 'replication')
+                  link_status = 'unknown'
+                  for r in repl_info.splitlines():
+                      if r.startswith('master_link_status:'):
+                          link_status = r.split(':')[1].strip()
+                  if link_status != 'up':
+                      all_up = False
+                  repl_details.append(f"    {addr}: master_link_status:{link_status}")
+
+          if all_up:
+              results.append(f"CHECK 5 — Replication Lag:     PASS (all replicas: master_link_status:up)")
+          else:
+              results.append(f"CHECK 5 — Replication Lag:     FAIL (some replicas not synced)")
+          for d in repl_details:
+              results.append(d)
+
+          # --- Print report ---
+          print("=" * 50)
+          print("FULL VERIFICATION REPORT")
+          print("=" * 50)
+          for r in results:
+              print(r)
+          print("=" * 50)
+
+    - name: Run full verify
+      command: python3 /tmp/full_verify.py
+      register: verify_out
+
+    - name: Print full verification report
+      debug:
+        msg: "{{ verify_out.stdout }}"

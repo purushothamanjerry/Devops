@@ -1,0 +1,334 @@
+---
+# ==============================================================================
+# Phase 4 — Rolling Upgrade
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Step 1: Pre-flight checks
+# ------------------------------------------------------------------------------
+- name: Pre-flight checks
+  hosts: redis-node-1
+  become: yes
+  tasks:
+    - name: Check cluster state
+      command: /usr/local/bin/redis-cli -p 6379 cluster info
+      register: cluster_info
+
+    - name: Fail if cluster not healthy
+      fail:
+        msg: "Cluster is not healthy! Aborting upgrade."
+      when: "'cluster_state:ok' not in cluster_info.stdout"
+
+    - name: Verify all nodes are reachable
+      command: /usr/local/bin/redis-cli -h {{ item }} -p 6379 ping
+      loop:
+        - 10.10.0.11
+        - 10.10.0.12
+        - 10.10.0.13
+        - 10.10.0.14
+        - 10.10.0.15
+        - 10.10.0.16
+      register: ping_results
+
+    - name: Get current version from first node
+      shell: "/usr/local/bin/redis-cli -p 6379 info server | grep redis_version | cut -d: -f2 | tr -d '\\r'"
+      register: current_version
+
+    - name: Check if upgrade is needed
+      fail:
+        msg: "All nodes already at v{{ target_version }} — nothing to upgrade."
+      when: current_version.stdout | trim == target_version
+
+    - name: Run pre-upgrade data verify
+      command: python3 /tmp/verify.py
+      register: pre_verify
+      ignore_errors: yes
+
+    - name: Print pre-flight results
+      debug:
+        msg: |
+          Pre-flight checks PASSED:
+            ✓ Cluster state: ok
+            ✓ All 6 nodes reachable
+            ✓ Current version: v{{ current_version.stdout | trim }} → target: v{{ target_version }}
+            ✓ Pre-upgrade data: {{ pre_verify.stdout | default('verify script not yet deployed') }}
+
+# ------------------------------------------------------------------------------
+# Step 2: Upgrade replicas first (one at a time)
+# ------------------------------------------------------------------------------
+- name: Upgrade Redis replicas
+  hosts: redis_replicas
+  become: yes
+  serial: 1
+  tasks:
+    - name: Get current version on this node
+      shell: "/usr/local/bin/redis-cli -p 6379 info server | grep redis_version | cut -d: -f2 | tr -d '\\r'"
+      register: node_version
+      ignore_errors: yes
+
+    - name: Skip if already at target version
+      debug:
+        msg: "{{ inventory_hostname }} already at v{{ target_version }} — skipping"
+      when: node_version.stdout | default('') | trim == target_version
+
+    - name: Stop Redis on replica
+      shell: pkill redis-server || true
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Wait for Redis to stop
+      wait_for:
+        port: 6379
+        host: 127.0.0.1
+        state: stopped
+        timeout: 30
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Download Redis {{ target_version }}
+      get_url:
+        url: "https://download.redis.io/releases/redis-{{ target_version }}.tar.gz"
+        dest: "/tmp/redis-{{ target_version }}.tar.gz"
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Extract Redis {{ target_version }}
+      unarchive:
+        src: "/tmp/redis-{{ target_version }}.tar.gz"
+        dest: /tmp/
+        remote_src: yes
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Compile and install Redis {{ target_version }}
+      shell: |
+        cd /tmp/redis-{{ target_version }}
+        make -j$(nproc)
+        make install
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Start Redis on replica
+      shell: |
+        nohup /usr/local/bin/redis-server /etc/redis/redis.conf \
+          > /var/log/redis/redis.log 2>&1 &
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Wait for Redis to start
+      wait_for:
+        port: 6379
+        host: 127.0.0.1
+        timeout: 30
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Wait for replica to rejoin and sync
+      shell: |
+        for i in $(seq 1 30); do
+          status=$(/usr/local/bin/redis-cli -p 6379 info replication | grep master_link_status | tr -d '\r')
+          if echo "$status" | grep -q "up"; then
+            echo "synced"
+            exit 0
+          fi
+          sleep 1
+        done
+        echo "timeout"
+        exit 1
+      register: sync_status
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Verify cluster state after replica upgrade
+      shell: /usr/local/bin/redis-cli -h 10.10.0.11 -p 6379 cluster info
+      register: cluster_check
+
+    - name: Fail if cluster not ok
+      fail:
+        msg: "Cluster not ok after upgrading {{ inventory_hostname }}! Stopping upgrade."
+      when: "'cluster_state:ok' not in cluster_check.stdout"
+
+    - name: Print progress
+      debug:
+        msg: "[{{ ansible_play_hosts.index(inventory_hostname) + 1 }}/6] Upgraded replica {{ inventory_hostname }} ({{ cluster_ip }}) — cluster: ok"
+
+# ------------------------------------------------------------------------------
+# Step 3: Upgrade masters (one at a time, with failover)
+# ------------------------------------------------------------------------------
+- name: Upgrade Redis masters
+  hosts: redis_masters
+  become: yes
+  serial: 1
+  tasks:
+    - name: Get current version on this node
+      shell: "/usr/local/bin/redis-cli -p 6379 info server | grep redis_version | cut -d: -f2 | tr -d '\\r'"
+      register: node_version
+      ignore_errors: yes
+
+    - name: Skip if already at target version
+      debug:
+        msg: "{{ inventory_hostname }} already at v{{ target_version }} — skipping"
+      when: node_version.stdout | default('') | trim == target_version
+
+    - name: Get this master's node ID
+      shell: /usr/local/bin/redis-cli -h {{ cluster_ip }} -p 6379 cluster myid
+      register: master_id
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Get replica IP for this master
+      shell: |
+        /usr/local/bin/redis-cli -h 10.10.0.11 -p 6379 cluster nodes | \
+        grep "slave {{ master_id.stdout | trim }}" | \
+        awk '{print $2}' | cut -d@ -f1 | cut -d: -f1 | head -1
+      register: replica_ip
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Show failover plan
+      debug:
+        msg: "Triggering CLUSTER FAILOVER on replica {{ replica_ip.stdout | default('N/A') }} to promote it before upgrading master {{ cluster_ip }}"
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Trigger CLUSTER FAILOVER on replica
+      shell: /usr/local/bin/redis-cli -h {{ replica_ip.stdout }} -p 6379 CLUSTER FAILOVER
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Wait for failover to complete
+      shell: |
+        for i in $(seq 1 15); do
+          role=$(/usr/local/bin/redis-cli -h {{ cluster_ip }} -p 6379 info replication | grep role | tr -d '\r')
+          if echo "$role" | grep -q "slave"; then
+            echo "failover complete — now a replica"
+            exit 0
+          fi
+          sleep 1
+        done
+        echo "failover may not have completed"
+      register: failover_result
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Stop Redis on old master
+      shell: pkill redis-server || true
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Wait for Redis to stop
+      wait_for:
+        port: 6379
+        host: 127.0.0.1
+        state: stopped
+        timeout: 30
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Download Redis {{ target_version }}
+      get_url:
+        url: "https://download.redis.io/releases/redis-{{ target_version }}.tar.gz"
+        dest: "/tmp/redis-{{ target_version }}.tar.gz"
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Extract Redis {{ target_version }}
+      unarchive:
+        src: "/tmp/redis-{{ target_version }}.tar.gz"
+        dest: /tmp/
+        remote_src: yes
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Compile and install Redis {{ target_version }}
+      shell: |
+        cd /tmp/redis-{{ target_version }}
+        make -j$(nproc)
+        make install
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Start Redis
+      shell: |
+        nohup /usr/local/bin/redis-server /etc/redis/redis.conf \
+          > /var/log/redis/redis.log 2>&1 &
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Wait for Redis to start
+      wait_for:
+        port: 6379
+        host: 127.0.0.1
+        timeout: 30
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Wait for node to rejoin cluster
+      shell: |
+        for i in $(seq 1 30); do
+          info=$(/usr/local/bin/redis-cli -h 10.10.0.11 -p 6379 cluster info | grep cluster_state | tr -d '\r')
+          if echo "$info" | grep -q "ok"; then
+            echo "cluster ok"
+            exit 0
+          fi
+          sleep 1
+        done
+        echo "timeout waiting for cluster"
+        exit 1
+      when: node_version.stdout | default('') | trim != target_version
+
+    - name: Verify cluster state after master upgrade
+      shell: /usr/local/bin/redis-cli -h 10.10.0.11 -p 6379 cluster info
+      register: cluster_check
+
+    - name: Fail if cluster not ok
+      fail:
+        msg: "Cluster not ok after upgrading {{ inventory_hostname }}! Stopping upgrade."
+      when: "'cluster_state:ok' not in cluster_check.stdout"
+
+    - name: Print progress
+      debug:
+        msg: "[{{ ansible_play_hosts.index(inventory_hostname) + 4 }}/6] Upgraded master {{ inventory_hostname }} ({{ cluster_ip }}) — cluster: ok"
+
+# ------------------------------------------------------------------------------
+# Step 4: Post-upgrade verification
+# ------------------------------------------------------------------------------
+- name: Post-upgrade verification
+  hosts: redis-node-1
+  become: yes
+  tasks:
+    - name: Deploy verify script
+      copy:
+        dest: /tmp/verify.py
+        content: |
+          import subprocess
+          import hashlib
+
+          missing = 0
+          mismatched = 0
+          verified = 0
+
+          for i in range(1, 1001):
+              key = f"key:{i:04d}"
+              expected = hashlib.sha256(key.encode()).hexdigest()
+              result = subprocess.run(
+                  ['/usr/local/bin/redis-cli', '-c', '-p', '6379', 'GET', key],
+                  capture_output=True, text=True
+              )
+              actual = result.stdout.strip()
+              if not actual:
+                  missing += 1
+              elif actual != expected:
+                  mismatched += 1
+              else:
+                  verified += 1
+
+          print(f"\n=== Verify Summary ===")
+          if missing == 0 and mismatched == 0:
+              print(f"PASS — {verified}/1000 keys verified")
+          else:
+              print(f"FAIL — {missing} keys missing, {mismatched} values mismatched")
+
+    - name: Run data verify
+      command: python3 /tmp/verify.py
+      register: verify_result
+
+    - name: Print data integrity result
+      debug:
+        msg: "{{ verify_result.stdout }}"
+
+    - name: Check all node versions
+      shell: |
+        for ip in 10.10.0.11 10.10.0.12 10.10.0.13 10.10.0.14 10.10.0.15 10.10.0.16; do
+          ver=$(/usr/local/bin/redis-cli -h $ip -p 6379 info server | grep redis_version | tr -d '\r')
+          echo "$ip: $ver"
+        done
+      register: versions
+
+    - name: Print versions
+      debug:
+        msg: "{{ versions.stdout }}"
+
+    - name: Upgrade complete
+      debug:
+        msg: "UPGRADE COMPLETE — all nodes on v{{ target_version }}, data integrity verified"

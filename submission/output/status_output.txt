@@ -1,0 +1,25 @@
+Checking prerequisites...
+  ✓ podman version 3.4.4 found
+  ✓ ansible-playbook [core 2.16.4] found
+  Proceeding...
+
+Fetching cluster status...
+
+PLAY [Redis Cluster Status] ****************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [redis-node-1]
+
+TASK [Create status script] ****************************************************
+changed: [redis-node-1]
+
+TASK [Run status script] *******************************************************
+changed: [redis-node-1]
+
+TASK [Print status] ************************************************************
+ok: [redis-node-1] => {
+    "msg": "Cluster State: ok\n\nMASTERS\n  10.10.0.11:6379  [master]  v7.0.15  slots: 0-5460  keys: db0:keys=333,expires=0,avg_ttl=0  mem: 2.1M\n  10.10.0.12:6379  [master]  v7.0.15  slots: 5461-10922  keys: db0:keys=324,expires=0,avg_ttl=0  mem: 2.0M\n  10.10.0.13:6379  [master]  v7.0.15  slots: 10923-16383  keys: db0:keys=343,expires=0,avg_ttl=0  mem: 1.9M\n\nREPLICAS\n  10.10.0.14:6379  [replica]  v7.0.15  replicating: 10.10.0.13:6379  mem: 1.9M\n  10.10.0.15:6379  [replica]  v7.0.15  replicating: 10.10.0.11:6379  mem: 2.1M\n  10.10.0.16:6379  [replica]  v7.0.15  replicating: 10.10.0.12:6379  mem: 2.0M"
+}
+
+PLAY RECAP *********************************************************************
+redis-node-1               : ok=4    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0

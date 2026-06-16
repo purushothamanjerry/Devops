@@ -1,0 +1,25 @@
+Checking prerequisites...
+  ✓ podman version 3.4.4 found
+  ✓ ansible-playbook [core 2.16.4] found
+  Proceeding...
+
+Verifying data...
+
+PLAY [Verify keys in Redis Cluster] ********************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [redis-node-1]
+
+TASK [Create verify script] ****************************************************
+changed: [redis-node-1]
+
+TASK [Run verify script] *******************************************************
+changed: [redis-node-1]
+
+TASK [Print verify result] *****************************************************
+ok: [redis-node-1] => {
+    "msg": "\n=== Verify Summary ===\nPASS — 1000/1000 keys verified"
+}
+
+PLAY RECAP *********************************************************************
+redis-node-1               : ok=4    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0

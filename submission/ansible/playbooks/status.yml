@@ -1,0 +1,89 @@
+---
+- name: Redis Cluster Status
+  hosts: redis-node-1
+  become: yes
+  tasks:
+    - name: Create status script
+      copy:
+        dest: /tmp/status.py
+        content: |
+          import subprocess, sys
+
+          def redis_cmd(*args):
+              r = subprocess.run(
+                  ['/usr/local/bin/redis-cli'] + list(args),
+                  capture_output=True, text=True
+              )
+              return r.stdout.strip()
+
+          nodes_raw = redis_cmd('-p', '6379', 'cluster', 'nodes')
+          cluster_info = redis_cmd('-p', '6379', 'cluster', 'info')
+
+          # Parse cluster state
+          state = 'unknown'
+          for line in cluster_info.splitlines():
+              if line.startswith('cluster_state:'):
+                  state = line.split(':')[1].strip()
+
+          masters = []
+          replicas = []
+
+          for line in nodes_raw.strip().splitlines():
+              parts = line.split()
+              if len(parts) < 8:
+                  continue
+              node_id   = parts[0]
+              addr      = parts[1].split('@')[0]   # ip:port
+              ip        = addr.split(':')[0]
+              port      = addr.split(':')[1]
+              flags     = parts[2]
+              master_id = parts[3]
+
+              # Get slot ranges (fields 8+)
+              slots = ' '.join(parts[8:]) if len(parts) > 8 else ''
+
+              version = redis_cmd('-h', ip, '-p', port, 'info', 'server')
+              ver = 'unknown'
+              for v in version.splitlines():
+                  if v.startswith('redis_version:'):
+                      ver = v.split(':')[1].strip()
+
+              mem_raw = redis_cmd('-h', ip, '-p', port, 'info', 'memory')
+              mem = 'unknown'
+              for m in mem_raw.splitlines():
+                  if m.startswith('used_memory_human:'):
+                      mem = m.split(':')[1].strip()
+
+              if 'master' in flags and 'slave' not in flags:
+                  key_count = redis_cmd('-h', ip, '-p', port, 'dbsize')
+                  masters.append({
+                      'addr': addr, 'ver': ver, 'slots': slots,
+                      'keys': key_count, 'mem': mem, 'id': node_id
+                  })
+              elif 'slave' in flags:
+                  # find master addr
+                  master_addr = 'unknown'
+                  for line2 in nodes_raw.strip().splitlines():
+                      p2 = line2.split()
+                      if p2[0] == master_id:
+                          master_addr = p2[1].split('@')[0]
+                  replicas.append({
+                      'addr': addr, 'ver': ver,
+                      'master': master_addr, 'mem': mem
+                  })
+
+          print(f"Cluster State: {state}\n")
+          print("MASTERS")
+          for m in masters:
+              print(f"  {m['addr']}  [master]  v{m['ver']}  slots: {m['slots']}  keys: {m['keys']}  mem: {m['mem']}")
+          print("\nREPLICAS")
+          for r in replicas:
+              print(f"  {r['addr']}  [replica]  v{r['ver']}  replicating: {r['master']}  mem: {r['mem']}")
+
+    - name: Run status script
+      command: python3 /tmp/status.py
+      register: status_out
+
+    - name: Print status
+      debug:
+        msg: "{{ status_out.stdout }}"

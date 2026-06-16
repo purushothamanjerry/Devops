@@ -1,0 +1,63 @@
+---
+- name: Install and configure Redis on all nodes
+  hosts: redis_all
+  become: yes
+  roles:
+    - redis
+
+- name: Form Redis Cluster
+  hosts: redis-node-1
+  become: yes
+  tasks:
+    - name: Wait for all Redis nodes to be ready
+      wait_for:
+        host: "{{ item }}"
+        port: 6379
+        timeout: 60
+      loop:
+        - 10.10.0.11
+        - 10.10.0.12
+        - 10.10.0.13
+        - 10.10.0.14
+        - 10.10.0.15
+        - 10.10.0.16
+
+    - name: Check if cluster already formed
+      shell: /usr/local/bin/redis-cli -p 6379 cluster info | grep cluster_known_nodes
+      register: cluster_check
+      changed_when: false
+
+    - name: Form the Redis cluster
+      shell: |
+        /usr/local/bin/redis-cli --cluster create \
+          10.10.0.11:6379 \
+          10.10.0.12:6379 \
+          10.10.0.13:6379 \
+          10.10.0.14:6379 \
+          10.10.0.15:6379 \
+          10.10.0.16:6379 \
+          --cluster-replicas {{ redis_replicas_per_master | default(1) }} --cluster-yes
+      register: cluster_result
+      when: "'cluster_known_nodes:1' in cluster_check.stdout"
+
+    - name: Print cluster formation result
+      debug:
+        msg: "{{ cluster_result.stdout | default('Cluster already formed — skipped') }}"
+
+    - name: Wait for cluster to stabilize
+      pause:
+        seconds: 3
+
+    - name: Verify cluster state
+      command: /usr/local/bin/redis-cli -p 6379 cluster info
+      register: final_check
+
+    - name: Confirm cluster is healthy
+      debug:
+        msg: "Cluster formation complete — cluster_state:ok"
+      when: "'cluster_state:ok' in final_check.stdout"
+
+    - name: Fail if cluster not ok
+      fail:
+        msg: "Cluster formation failed! {{ final_check.stdout }}"
+      when: "'cluster_state:ok' not in final_check.stdout"

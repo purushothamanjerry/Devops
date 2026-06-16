@@ -1,0 +1,215 @@
+Checking prerequisites...
+  ✓ podman version 3.4.4 found
+  ✓ ansible-playbook [core 2.16.4] found
+  Proceeding...
+
+Provisioning Redis Cluster v7.0.15...
+
+PLAY [Install and configure Redis on all nodes] ********************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [redis-node-1]
+ok: [redis-node-3]
+ok: [redis-node-2]
+ok: [redis-node-5]
+ok: [redis-node-4]
+ok: [redis-node-6]
+
+TASK [redis : Install build dependencies] **************************************
+ok: [redis-node-4]
+ok: [redis-node-5]
+ok: [redis-node-3]
+ok: [redis-node-1]
+ok: [redis-node-2]
+ok: [redis-node-6]
+
+TASK [redis : Create redis directories] ****************************************
+ok: [redis-node-2] => (item=/var/lib/redis)
+ok: [redis-node-1] => (item=/var/lib/redis)
+ok: [redis-node-3] => (item=/var/lib/redis)
+ok: [redis-node-4] => (item=/var/lib/redis)
+ok: [redis-node-5] => (item=/var/lib/redis)
+ok: [redis-node-1] => (item=/var/log/redis)
+ok: [redis-node-2] => (item=/var/log/redis)
+ok: [redis-node-3] => (item=/var/log/redis)
+ok: [redis-node-4] => (item=/var/log/redis)
+ok: [redis-node-5] => (item=/var/log/redis)
+ok: [redis-node-1] => (item=/etc/redis)
+ok: [redis-node-3] => (item=/etc/redis)
+ok: [redis-node-2] => (item=/etc/redis)
+ok: [redis-node-4] => (item=/etc/redis)
+ok: [redis-node-5] => (item=/etc/redis)
+ok: [redis-node-6] => (item=/var/lib/redis)
+ok: [redis-node-6] => (item=/var/log/redis)
+ok: [redis-node-6] => (item=/etc/redis)
+
+TASK [redis : Check current Redis version] *************************************
+ok: [redis-node-2]
+ok: [redis-node-1]
+ok: [redis-node-3]
+ok: [redis-node-4]
+ok: [redis-node-5]
+ok: [redis-node-6]
+
+TASK [redis : Show current version] ********************************************
+ok: [redis-node-1] => {
+    "msg": "Current Redis: not installed"
+}
+ok: [redis-node-2] => {
+    "msg": "Current Redis: not installed"
+}
+ok: [redis-node-3] => {
+    "msg": "Current Redis: not installed"
+}
+ok: [redis-node-4] => {
+    "msg": "Current Redis: not installed"
+}
+ok: [redis-node-5] => {
+    "msg": "Current Redis: not installed"
+}
+ok: [redis-node-6] => {
+    "msg": "Current Redis: not installed"
+}
+
+TASK [redis : Download Redis 7.0.15] *******************************************
+changed: [redis-node-4]
+changed: [redis-node-5]
+changed: [redis-node-2]
+changed: [redis-node-1]
+changed: [redis-node-3]
+changed: [redis-node-6]
+
+TASK [redis : Extract Redis 7.0.15] ********************************************
+changed: [redis-node-3]
+changed: [redis-node-2]
+changed: [redis-node-1]
+changed: [redis-node-4]
+changed: [redis-node-5]
+changed: [redis-node-6]
+
+TASK [redis : Compile and install Redis 7.0.15] ********************************
+changed: [redis-node-1]
+changed: [redis-node-2]
+changed: [redis-node-3]
+changed: [redis-node-4]
+changed: [redis-node-5]
+changed: [redis-node-6]
+
+TASK [redis : Verify installed version] ****************************************
+changed: [redis-node-1]
+changed: [redis-node-2]
+changed: [redis-node-3]
+changed: [redis-node-4]
+changed: [redis-node-5]
+changed: [redis-node-6]
+
+TASK [redis : Show new version] ************************************************
+ok: [redis-node-1] => {
+    "msg": "Installed Redis: Redis server v=7.0.15 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=bbecd815844529a8"
+}
+ok: [redis-node-2] => {
+    "msg": "Installed Redis: Redis server v=7.0.15 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=6f259d23eee03483"
+}
+ok: [redis-node-3] => {
+    "msg": "Installed Redis: Redis server v=7.0.15 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=a0dc1205a6717307"
+}
+ok: [redis-node-4] => {
+    "msg": "Installed Redis: Redis server v=7.0.15 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=9982f350eca8834d"
+}
+ok: [redis-node-5] => {
+    "msg": "Installed Redis: Redis server v=7.0.15 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=567b7c76a439c4c9"
+}
+ok: [redis-node-6] => {
+    "msg": "Installed Redis: Redis server v=7.0.15 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=fbb1f9d51e7e2f7"
+}
+
+TASK [redis : Deploy redis.conf] ***********************************************
+changed: [redis-node-1]
+changed: [redis-node-2]
+changed: [redis-node-3]
+changed: [redis-node-4]
+changed: [redis-node-5]
+changed: [redis-node-6]
+
+TASK [redis : Stop existing Redis if running] **********************************
+ok: [redis-node-1]
+ok: [redis-node-2]
+ok: [redis-node-3]
+ok: [redis-node-4]
+ok: [redis-node-5]
+ok: [redis-node-6]
+
+TASK [redis : Clean old cluster data] ******************************************
+ok: [redis-node-1]
+ok: [redis-node-2]
+ok: [redis-node-3]
+ok: [redis-node-4]
+ok: [redis-node-5]
+ok: [redis-node-6]
+
+TASK [redis : Start Redis directly] ********************************************
+changed: [redis-node-1]
+changed: [redis-node-2]
+changed: [redis-node-3]
+changed: [redis-node-4]
+changed: [redis-node-5]
+changed: [redis-node-6]
+
+TASK [redis : Wait for Redis to start] *****************************************
+ok: [redis-node-2]
+ok: [redis-node-1]
+ok: [redis-node-3]
+ok: [redis-node-4]
+ok: [redis-node-5]
+ok: [redis-node-6]
+
+TASK [redis : Verify Redis is running] *****************************************
+changed: [redis-node-1]
+changed: [redis-node-2]
+changed: [redis-node-3]
+changed: [redis-node-4]
+changed: [redis-node-5]
+changed: [redis-node-6]
+
+PLAY [Form Redis Cluster] ******************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [redis-node-1]
+
+TASK [Wait for all Redis nodes to be ready] ************************************
+ok: [redis-node-1] => (item=10.10.0.11)
+ok: [redis-node-1] => (item=10.10.0.12)
+ok: [redis-node-1] => (item=10.10.0.13)
+ok: [redis-node-1] => (item=10.10.0.14)
+ok: [redis-node-1] => (item=10.10.0.15)
+ok: [redis-node-1] => (item=10.10.0.16)
+
+TASK [Check if cluster already formed] *****************************************
+ok: [redis-node-1]
+
+TASK [Form the Redis cluster] **************************************************
+changed: [redis-node-1]
+
+TASK [Print cluster formation result] ******************************************
+ok: [redis-node-1] => {
+    "msg": ">>> Performing hash slots allocation on 6 nodes...\nMaster[0] -> Slots 0 - 5460\nMaster[1] -> Slots 5461 - 10922\nMaster[2] -> Slots 10923 - 16383\nAdding replica 10.10.0.15:6379 to 10.10.0.11:6379\nAdding replica 10.10.0.16:6379 to 10.10.0.12:6379\nAdding replica 10.10.0.14:6379 to 10.10.0.13:6379\n...\n[OK] All nodes agree about slots configuration.\n[OK] All 16384 slots covered."
+}
+
+TASK [Wait for cluster to stabilize] *******************************************
+ok: [redis-node-1]
+
+TASK [Verify cluster state] ****************************************************
+changed: [redis-node-1]
+
+TASK [Confirm cluster is healthy] **********************************************
+ok: [redis-node-1] => {
+    "msg": "Cluster formation complete — cluster_state:ok"
+}
+
+PLAY RECAP *********************************************************************
+redis-node-1               : ok=24   changed=7    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+redis-node-2               : ok=16   changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+redis-node-3               : ok=16   changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+redis-node-4               : ok=16   changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+redis-node-5               : ok=16   changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+redis-node-6               : ok=16   changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
