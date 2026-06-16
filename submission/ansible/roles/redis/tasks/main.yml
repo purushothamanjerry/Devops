@@ -53,6 +53,7 @@
   args:
     executable: /bin/bash
   when: installed_version != redis_version
+  notify: Restart Redis
 
 - name: Verify installed version
   command: /usr/local/bin/redis-server --version
@@ -67,23 +68,30 @@
     src: redis.conf.j2
     dest: /etc/redis/redis.conf
     mode: '0644'
+  notify: Restart Redis
 
-- name: Stop existing Redis if running
-  shell: pkill redis-server || true
-  changed_when: false
-
-# Only wipe cluster data when installing a different version to preserve data on config-only re-runs
-- name: Clean old cluster data
-  shell: rm -rf /var/lib/redis/*
-  changed_when: false
+- name: Stop Redis and clean data for new installation
+  shell: |
+    pkill redis-server || true
+    rm -rf /var/lib/redis/*
   when: installed_version != redis_version
 
-- name: Start Redis directly
+- name: Check if Redis is running
+  shell: pgrep redis-server
+  register: redis_running
+  failed_when: false
+  changed_when: false
+
+- name: Start Redis if not running
   shell: |
     nohup /usr/local/bin/redis-server /etc/redis/redis.conf \
       > /var/log/redis/redis.log 2>&1 &
   async: 0
   poll: 0
+  when: redis_running.rc != 0
+
+- name: Flush handlers to apply restarts
+  meta: flush_handlers
 
 - name: Wait for Redis to start
   wait_for:

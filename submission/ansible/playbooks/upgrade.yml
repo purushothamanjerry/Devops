@@ -35,9 +35,17 @@
       register: current_version
 
     - name: Check if upgrade is needed
-      fail:
+      set_fact:
+        upgrade_needed: "{{ current_version.stdout | trim != target_version }}"
+
+    - name: Skip upgrade if already at target version
+      debug:
         msg: "All nodes already at v{{ target_version }} — nothing to upgrade."
-      when: current_version.stdout | trim == target_version
+      when: not upgrade_needed
+
+    - name: End play if no upgrade needed
+      meta: end_play
+      when: not upgrade_needed
 
     - name: Run pre-upgrade data verify
       command: python3 /tmp/verify.py
@@ -61,6 +69,10 @@
   become: yes
   serial: 1
   tasks:
+    - name: End play if no upgrade needed
+      meta: end_play
+      when: not hostvars['redis-node-1']['upgrade_needed'] | default(true)
+
     - name: Get current version on this node
       shell: "/usr/local/bin/redis-cli -p 6379 info server | grep redis_version | cut -d: -f2 | tr -d '\\r'"
       register: node_version
@@ -152,6 +164,10 @@
   become: yes
   serial: 1
   tasks:
+    - name: End play if no upgrade needed
+      meta: end_play
+      when: not hostvars['redis-node-1']['upgrade_needed'] | default(true)
+
     - name: Get current version on this node
       shell: "/usr/local/bin/redis-cli -p 6379 info server | grep redis_version | cut -d: -f2 | tr -d '\\r'"
       register: node_version
@@ -277,6 +293,10 @@
   hosts: redis-node-1
   become: yes
   tasks:
+    - name: End play if no upgrade needed
+      meta: end_play
+      when: not hostvars['redis-node-1']['upgrade_needed'] | default(true)
+
     - name: Deploy verify script
       copy:
         dest: /tmp/verify.py

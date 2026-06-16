@@ -1,0 +1,117 @@
+{"timestamp": "2026-06-16T14:54:57.831092Z", "node": "redis-node-5", "action": "Gathering Facts", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:54:57.844469Z", "node": "redis-node-3", "action": "Gathering Facts", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:54:57.856985Z", "node": "redis-node-2", "action": "Gathering Facts", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:54:57.868077Z", "node": "redis-node-4", "action": "Gathering Facts", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:54:57.878680Z", "node": "redis-node-1", "action": "Gathering Facts", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:55:01.299585Z", "node": "redis-node-6", "action": "Gathering Facts", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:55:50.711715Z", "node": "redis-node-2", "action": "redis : Install build dependencies", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:55:50.737552Z", "node": "redis-node-4", "action": "redis : Install build dependencies", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:55:50.760290Z", "node": "redis-node-1", "action": "redis : Install build dependencies", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:55:50.972581Z", "node": "redis-node-5", "action": "redis : Install build dependencies", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:55:51.403074Z", "node": "redis-node-3", "action": "redis : Install build dependencies", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:23.312687Z", "node": "redis-node-6", "action": "redis : Install build dependencies", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:28.743488Z", "node": "redis-node-2", "action": "redis : Create redis directories", "outcome": "OK", "details": "All items completed"}
+{"timestamp": "2026-06-16T14:56:28.767842Z", "node": "redis-node-5", "action": "redis : Create redis directories", "outcome": "OK", "details": "All items completed"}
+{"timestamp": "2026-06-16T14:56:28.790798Z", "node": "redis-node-4", "action": "redis : Create redis directories", "outcome": "OK", "details": "All items completed"}
+{"timestamp": "2026-06-16T14:56:28.812919Z", "node": "redis-node-3", "action": "redis : Create redis directories", "outcome": "OK", "details": "All items completed"}
+{"timestamp": "2026-06-16T14:56:28.835917Z", "node": "redis-node-1", "action": "redis : Create redis directories", "outcome": "OK", "details": "All items completed"}
+{"timestamp": "2026-06-16T14:56:33.515179Z", "node": "redis-node-6", "action": "redis : Create redis directories", "outcome": "OK", "details": "All items completed"}
+{"timestamp": "2026-06-16T14:56:35.471472Z", "node": "redis-node-5", "action": "redis : Check current Redis version", "outcome": "OK", "details": "[Errno 2] No such file or directory: b'/usr/local/bin/redis-server'"}
+{"timestamp": "2026-06-16T14:56:35.494884Z", "node": "redis-node-1", "action": "redis : Check current Redis version", "outcome": "OK", "details": "[Errno 2] No such file or directory: b'/usr/local/bin/redis-server'"}
+{"timestamp": "2026-06-16T14:56:35.520830Z", "node": "redis-node-3", "action": "redis : Check current Redis version", "outcome": "OK", "details": "[Errno 2] No such file or directory: b'/usr/local/bin/redis-server'"}
+{"timestamp": "2026-06-16T14:56:35.544440Z", "node": "redis-node-4", "action": "redis : Check current Redis version", "outcome": "OK", "details": "[Errno 2] No such file or directory: b'/usr/local/bin/redis-server'"}
+{"timestamp": "2026-06-16T14:56:35.569500Z", "node": "redis-node-2", "action": "redis : Check current Redis version", "outcome": "OK", "details": "[Errno 2] No such file or directory: b'/usr/local/bin/redis-server'"}
+{"timestamp": "2026-06-16T14:56:37.034828Z", "node": "redis-node-6", "action": "redis : Check current Redis version", "outcome": "OK", "details": "[Errno 2] No such file or directory: b'/usr/local/bin/redis-server'"}
+{"timestamp": "2026-06-16T14:56:37.154252Z", "node": "redis-node-1", "action": "redis : Show current version", "outcome": "OK", "details": "Current Redis: "}
+{"timestamp": "2026-06-16T14:56:37.215969Z", "node": "redis-node-2", "action": "redis : Show current version", "outcome": "OK", "details": "Current Redis: "}
+{"timestamp": "2026-06-16T14:56:37.278890Z", "node": "redis-node-3", "action": "redis : Show current version", "outcome": "OK", "details": "Current Redis: "}
+{"timestamp": "2026-06-16T14:56:37.341797Z", "node": "redis-node-4", "action": "redis : Show current version", "outcome": "OK", "details": "Current Redis: "}
+{"timestamp": "2026-06-16T14:56:37.404128Z", "node": "redis-node-5", "action": "redis : Show current version", "outcome": "OK", "details": "Current Redis: "}
+{"timestamp": "2026-06-16T14:56:37.442163Z", "node": "redis-node-6", "action": "redis : Show current version", "outcome": "OK", "details": "Current Redis: "}
+{"timestamp": "2026-06-16T14:56:37.555156Z", "node": "redis-node-1", "action": "redis : Parse installed version", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:37.619569Z", "node": "redis-node-2", "action": "redis : Parse installed version", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:37.683631Z", "node": "redis-node-3", "action": "redis : Parse installed version", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:37.744532Z", "node": "redis-node-4", "action": "redis : Parse installed version", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:37.811655Z", "node": "redis-node-5", "action": "redis : Parse installed version", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:37.838273Z", "node": "redis-node-6", "action": "redis : Parse installed version", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:43.795983Z", "node": "redis-node-3", "action": "redis : Download Redis 7.0.15", "outcome": "OK", "details": "OK (2994329 bytes)"}
+{"timestamp": "2026-06-16T14:56:43.856803Z", "node": "redis-node-1", "action": "redis : Download Redis 7.0.15", "outcome": "OK", "details": "OK (2994329 bytes)"}
+{"timestamp": "2026-06-16T14:56:44.059111Z", "node": "redis-node-5", "action": "redis : Download Redis 7.0.15", "outcome": "OK", "details": "OK (2994329 bytes)"}
+{"timestamp": "2026-06-16T14:56:44.119886Z", "node": "redis-node-2", "action": "redis : Download Redis 7.0.15", "outcome": "OK", "details": "OK (2994329 bytes)"}
+{"timestamp": "2026-06-16T14:56:44.141849Z", "node": "redis-node-4", "action": "redis : Download Redis 7.0.15", "outcome": "OK", "details": "OK (2994329 bytes)"}
+{"timestamp": "2026-06-16T14:56:45.868744Z", "node": "redis-node-6", "action": "redis : Download Redis 7.0.15", "outcome": "OK", "details": "OK (2994329 bytes)"}
+{"timestamp": "2026-06-16T14:56:50.078305Z", "node": "redis-node-3", "action": "redis : Extract Redis 7.0.15", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:50.116959Z", "node": "redis-node-4", "action": "redis : Extract Redis 7.0.15", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:50.140806Z", "node": "redis-node-1", "action": "redis : Extract Redis 7.0.15", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:50.160048Z", "node": "redis-node-2", "action": "redis : Extract Redis 7.0.15", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:50.178533Z", "node": "redis-node-5", "action": "redis : Extract Redis 7.0.15", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T14:56:53.558708Z", "node": "redis-node-6", "action": "redis : Extract Redis 7.0.15", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:02:27.218115Z", "node": "redis-node-5", "action": "redis : Compile and install Redis 7.0.15", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:02:27.270792Z", "node": "redis-node-3", "action": "redis : Compile and install Redis 7.0.15", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:02:27.296564Z", "node": "redis-node-4", "action": "redis : Compile and install Redis 7.0.15", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:02:27.865955Z", "node": "redis-node-2", "action": "redis : Compile and install Redis 7.0.15", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:02:27.900685Z", "node": "redis-node-1", "action": "redis : Compile and install Redis 7.0.15", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:30.965886Z", "node": "redis-node-6", "action": "redis : Compile and install Redis 7.0.15", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:32.912150Z", "node": "redis-node-1", "action": "redis : Verify installed version", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:33.797475Z", "node": "redis-node-2", "action": "redis : Verify installed version", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:33.925887Z", "node": "redis-node-4", "action": "redis : Verify installed version", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:33.951131Z", "node": "redis-node-3", "action": "redis : Verify installed version", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:34.025872Z", "node": "redis-node-5", "action": "redis : Verify installed version", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:34.526793Z", "node": "redis-node-6", "action": "redis : Verify installed version", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:34.650239Z", "node": "redis-node-1", "action": "redis : Show new version", "outcome": "OK", "details": "Installed Redis: Redis server v=7.0.15 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=c9913197b1a56087"}
+{"timestamp": "2026-06-16T15:03:34.726846Z", "node": "redis-node-2", "action": "redis : Show new version", "outcome": "OK", "details": "Installed Redis: Redis server v=7.0.15 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=b2c286ae30813b60"}
+{"timestamp": "2026-06-16T15:03:34.801934Z", "node": "redis-node-3", "action": "redis : Show new version", "outcome": "OK", "details": "Installed Redis: Redis server v=7.0.15 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=7d3b098878107ce4"}
+{"timestamp": "2026-06-16T15:03:34.877302Z", "node": "redis-node-4", "action": "redis : Show new version", "outcome": "OK", "details": "Installed Redis: Redis server v=7.0.15 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=4465e8dd32c98cae"}
+{"timestamp": "2026-06-16T15:03:34.952709Z", "node": "redis-node-5", "action": "redis : Show new version", "outcome": "OK", "details": "Installed Redis: Redis server v=7.0.15 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=8b9c67fb7a58cb2a"}
+{"timestamp": "2026-06-16T15:03:34.981314Z", "node": "redis-node-6", "action": "redis : Show new version", "outcome": "OK", "details": "Installed Redis: Redis server v=7.0.15 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=40f9253908da4b9b"}
+{"timestamp": "2026-06-16T15:03:38.768052Z", "node": "redis-node-4", "action": "redis : Deploy redis.conf", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:38.796467Z", "node": "redis-node-3", "action": "redis : Deploy redis.conf", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:38.821446Z", "node": "redis-node-1", "action": "redis : Deploy redis.conf", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:38.847523Z", "node": "redis-node-2", "action": "redis : Deploy redis.conf", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:38.874056Z", "node": "redis-node-5", "action": "redis : Deploy redis.conf", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:41.978097Z", "node": "redis-node-6", "action": "redis : Deploy redis.conf", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:46.614460Z", "node": "redis-node-1", "action": "redis : Stop Redis and clean data for new installation", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:46.683833Z", "node": "redis-node-2", "action": "redis : Stop Redis and clean data for new installation", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:46.742936Z", "node": "redis-node-3", "action": "redis : Stop Redis and clean data for new installation", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:46.793848Z", "node": "redis-node-4", "action": "redis : Stop Redis and clean data for new installation", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:46.834617Z", "node": "redis-node-5", "action": "redis : Stop Redis and clean data for new installation", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:48.257239Z", "node": "redis-node-6", "action": "redis : Stop Redis and clean data for new installation", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:50.309404Z", "node": "redis-node-1", "action": "redis : Check if Redis is running", "outcome": "OK", "details": "non-zero return code"}
+{"timestamp": "2026-06-16T15:03:50.396520Z", "node": "redis-node-4", "action": "redis : Check if Redis is running", "outcome": "OK", "details": "non-zero return code"}
+{"timestamp": "2026-06-16T15:03:50.430972Z", "node": "redis-node-2", "action": "redis : Check if Redis is running", "outcome": "OK", "details": "non-zero return code"}
+{"timestamp": "2026-06-16T15:03:50.459687Z", "node": "redis-node-3", "action": "redis : Check if Redis is running", "outcome": "OK", "details": "non-zero return code"}
+{"timestamp": "2026-06-16T15:03:50.504040Z", "node": "redis-node-5", "action": "redis : Check if Redis is running", "outcome": "OK", "details": "non-zero return code"}
+{"timestamp": "2026-06-16T15:03:51.983139Z", "node": "redis-node-6", "action": "redis : Check if Redis is running", "outcome": "OK", "details": "non-zero return code"}
+{"timestamp": "2026-06-16T15:03:53.882861Z", "node": "redis-node-1", "action": "redis : Start Redis if not running", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:53.909487Z", "node": "redis-node-2", "action": "redis : Start Redis if not running", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:53.962587Z", "node": "redis-node-3", "action": "redis : Start Redis if not running", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:53.994274Z", "node": "redis-node-4", "action": "redis : Start Redis if not running", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:54.104172Z", "node": "redis-node-5", "action": "redis : Start Redis if not running", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:55.523861Z", "node": "redis-node-6", "action": "redis : Start Redis if not running", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:59.615664Z", "node": "redis-node-1", "action": "redis : Restart Redis", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:59.652178Z", "node": "redis-node-2", "action": "redis : Restart Redis", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:59.714305Z", "node": "redis-node-3", "action": "redis : Restart Redis", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:59.750684Z", "node": "redis-node-4", "action": "redis : Restart Redis", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:03:59.782954Z", "node": "redis-node-5", "action": "redis : Restart Redis", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:03.325954Z", "node": "redis-node-6", "action": "redis : Restart Redis", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:05.368758Z", "node": "redis-node-3", "action": "redis : Wait for Redis to start", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:05.395074Z", "node": "redis-node-2", "action": "redis : Wait for Redis to start", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:05.422777Z", "node": "redis-node-5", "action": "redis : Wait for Redis to start", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:05.448038Z", "node": "redis-node-4", "action": "redis : Wait for Redis to start", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:05.475949Z", "node": "redis-node-1", "action": "redis : Wait for Redis to start", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:06.992577Z", "node": "redis-node-6", "action": "redis : Wait for Redis to start", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:08.833950Z", "node": "redis-node-1", "action": "redis : Verify Redis is running", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:08.859695Z", "node": "redis-node-2", "action": "redis : Verify Redis is running", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:08.916571Z", "node": "redis-node-3", "action": "redis : Verify Redis is running", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:08.958005Z", "node": "redis-node-4", "action": "redis : Verify Redis is running", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:09.001296Z", "node": "redis-node-5", "action": "redis : Verify Redis is running", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:10.466180Z", "node": "redis-node-6", "action": "redis : Verify Redis is running", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:13.450350Z", "node": "redis-node-1", "action": "Gathering Facts", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:26.122847Z", "node": "redis-node-1", "action": "Wait for all Redis nodes to be ready", "outcome": "OK", "details": "All items completed"}
+{"timestamp": "2026-06-16T15:04:27.808838Z", "node": "redis-node-1", "action": "Check if cluster already formed", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:31.568050Z", "node": "redis-node-1", "action": "Form the Redis cluster", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:31.649882Z", "node": "redis-node-1", "action": "Print cluster formation result", "outcome": "OK", "details": "\u001b[29;1m>>> Performing hash slots allocation on 6 nodes...\n\u001b[0mMaster[0] -> Slots 0 - 5460\nMaster[1] -> Slots 5461 - 10922\nMaster[2] -> Slots 10923 - 16383\nAdding replica 10.10.0.15:6379 to 10.10.0.11:6379\nAdding replica 10.10.0.16:6379 to 10.10.0.12:6379\nAdding replica 10.10.0.14:6379 to 10.10.0.13:6379\nM: ddfa13372ece454bf6f63ffd1f54db14a5a42d42 10.10.0.11:6379\n   slots:[0-5460] (5461 slots) master\nM: 3db2ae4b15101f27e5a44a94ab0605bf7107a8b7 10.10.0.12:6379\n   slots:[5461-10922] (5462 slots) master\nM: fbf729ad2b1ab2677ac32c731b597ac0d67d0de6 10.10.0.13:6379\n   slots:[10923-16383] (5461 slots) master\nS: d7e4b2b90ce7bc9ad0042ad0e83fa3d73d027e80 10.10.0.14:6379\n   replicates fbf729ad2b1ab2677ac32c731b597ac0d67d0de6\nS: b38777aeff0bde18b04af4d0d7095e3f21d2148a 10.10.0.15:6379\n   replicates ddfa13372ece454bf6f63ffd1f54db14a5a42d42\nS: 2dca4fe99c2c52881099a32315d689e8e7dadf54 10.10.0.16:6379\n   replicates 3db2ae4b15101f27e5a44a94ab0605bf7107a8b7\n\u001b[29;1m>>> Nodes configuration updated\n\u001b[0m\u001b[29;1m>>> Assign a different config epoch to each node\n\u001b[0m\u001b[29;1m>>> Sending CLUSTER MEET messages to join the cluster\n\u001b[0mWaiting for the cluster to join\n.\n\u001b[29;1m>>> Performing Cluster Check (using node 10.10.0.11:6379)\n\u001b[0mM: ddfa13372ece454bf6f63ffd1f54db14a5a42d42 10.10.0.11:6379\n   slots:[0-5460] (5461 slots) master\n   1 additional replica(s)\nM: fbf729ad2b1ab2677ac32c731b597ac0d67d0de6 10.10.0.13:6379\n   slots:[10923-16383] (5461 slots) master\n   1 additional replica(s)\nS: d7e4b2b90ce7bc9ad0042ad0e83fa3d73d027e80 10.10.0.14:6379\n   slots: (0 slots) slave\n   replicates fbf729ad2b1ab2677ac32c731b597ac0d67d0de6\nM: 3db2ae4b15101f27e5a44a94ab0605bf7107a8b7 10.10.0.12:6379\n   slots:[5461-10922] (5462 slots) master\n   1 additional replica(s)\nS: 2dca4fe99c2c52881099a32315d689e8e7dadf54 10.10.0.16:6379\n   slots: (0 slots) slave\n   replicates 3db2ae4b15101f27e5a44a94ab0605bf7107a8b7\nS: b38777aeff0bde18b04af4d0d7095e3f21d2148a 10.10.0.15:6379\n   slots: (0 slots) slave\n   replicates ddfa13372ece454bf6f63ffd1f54db14a5a42d42\n\u001b[32;1m[OK] All nodes agree about slots configuration.\n\u001b[0m\u001b[29;1m>>> Check for open slots...\n\u001b[0m\u001b[29;1m>>> Check slots coverage...\n\u001b[0m\u001b[32;1m[OK] All 16384 slots covered.\n\u001b[0m"}
+{"timestamp": "2026-06-16T15:04:34.730841Z", "node": "redis-node-1", "action": "Wait for cluster to stabilize", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:36.398156Z", "node": "redis-node-1", "action": "Verify cluster state", "outcome": "OK", "details": ""}
+{"timestamp": "2026-06-16T15:04:36.470229Z", "node": "redis-node-1", "action": "Confirm cluster is healthy", "outcome": "OK", "details": "Cluster formation complete \u2014 cluster_state:ok"}
+{"timestamp": "2026-06-16T15:04:36.525129Z", "node": "redis-node-1", "action": "Fail if cluster not ok", "outcome": "SKIPPED", "details": ""}

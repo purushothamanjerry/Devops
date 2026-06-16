@@ -1,8 +1,8 @@
-- name: reload systemd
-  systemd:
-    daemon_reload: yes
-
-- name: restart redis
-  systemd:
-    name: redis
-    state: restarted
+- name: Restart Redis
+  shell: |
+    pkill redis-server || true
+    sleep 2
+    nohup /usr/local/bin/redis-server /etc/redis/redis.conf \
+      > /var/log/redis/redis.log 2>&1 &
+  async: 0
+  poll: 0
