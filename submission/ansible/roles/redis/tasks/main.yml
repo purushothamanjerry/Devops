@@ -29,8 +29,7 @@
 
 - name: Parse installed version
   set_fact:
-    installed_version: >-
-      {{ redis_installed.stdout | default('') | regex_search('v=([0-9.]+)', '\1') | first | default('') }}
+    installed_version: "{{ redis_installed.stdout.split('v=')[1].split(' ')[0] if 'v=' in redis_installed.stdout else '' }}"
 
 - name: Download Redis {{ redis_version }}
   get_url:
