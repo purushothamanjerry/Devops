@@ -1,8 +1,0 @@
-redis_version: "7.0.15"
-redis_port: 6379
-redis_cluster_enabled: yes
-redis_cluster_config_file: nodes.conf
-redis_cluster_node_timeout: 5000
-redis_bind: "0.0.0.0"
-redis_dir: /var/lib/redis
-redis_log_file: /var/log/redis/redis.log
