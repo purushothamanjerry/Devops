@@ -33,14 +33,14 @@
     url: "https://download.redis.io/releases/redis-{{ redis_version }}.tar.gz"
     dest: "/tmp/redis-{{ redis_version }}.tar.gz"
     force: yes
-  when: installed_version != redis_version
+  when: installed_version == ''
 
 - name: Extract Redis {{ redis_version }}
   unarchive:
     src: "/tmp/redis-{{ redis_version }}.tar.gz"
     dest: /tmp/
     remote_src: yes
-  when: installed_version != redis_version
+  when: installed_version == ''
 
 - name: Compile and install Redis {{ redis_version }}
   shell: |
@@ -49,7 +49,7 @@
     make install
   args:
     executable: /bin/bash
-  when: installed_version != redis_version
+  when: installed_version == ''
   notify: Restart Redis
 
 - name: Verify installed version
@@ -68,7 +68,7 @@
   shell: |
     pkill redis-server || true
     rm -rf /var/lib/redis/*
-  when: installed_version != redis_version
+  when: installed_version == ''
 
 - name: Check if Redis is running
   shell: pgrep redis-server

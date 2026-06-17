@@ -1,0 +1,17 @@
+---
+- hosts: redis-node-1
+  become: yes
+  tasks:
+    - name: Check current Redis version
+      command: /usr/local/bin/redis-server --version
+      register: redis_installed
+      failed_when: false
+      changed_when: false
+
+    - name: Parse installed version
+      set_fact:
+        installed_version: "{{ redis_installed.stdout.split('v=')[1].split(' ')[0] if 'v=' in redis_installed.stdout else '' }}"
+    
+    - name: Debug installed_version
+      debug:
+        msg: "installed_version is '{{ installed_version }}', type is {{ installed_version | type_debug }}, redis_version is '{{ redis_version | default('NOT SET') }}'"

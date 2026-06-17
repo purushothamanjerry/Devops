@@ -1,4 +1,23 @@
 ---
+- name: Pre-flight checks for provision
+  hosts: redis-node-1
+  become: yes
+  tasks:
+    - name: Check if redis is installed
+      command: /usr/local/bin/redis-server --version
+      register: redis_installed
+      failed_when: false
+      changed_when: false
+
+    - name: Skip provision if already provisioned
+      debug:
+        msg: "Cluster is already provisioned. Provisioning is a no-op."
+      when: redis_installed.rc == 0
+
+    - name: End play if already provisioned
+      meta: end_play
+      when: redis_installed.rc == 0
+
 - name: Install and configure Redis on all nodes
   hosts: redis_all
   become: yes
