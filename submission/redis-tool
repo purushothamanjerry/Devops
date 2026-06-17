@@ -55,7 +55,7 @@ def check_prerequisites():
 
     print("  Proceeding...\n")
 
-def run_playbook(playbook, extra_vars=None):
+def run_playbook(playbook, extra_vars=None, quiet=False):
     cmd = [
         "ansible-playbook",
         "-i", INVENTORY,
@@ -70,9 +70,15 @@ def run_playbook(playbook, extra_vars=None):
     env = os.environ.copy()
     env["ANSIBLE_CONFIG"] = os.path.join(ANSIBLE_DIR, "ansible.cfg")
     
-    result = subprocess.run(cmd, env=env)
+    if quiet:
+        result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+    else:
+        result = subprocess.run(cmd, env=env)
+        
     if result.returncode != 0:
         print(f"\n[ERROR] Playbook {playbook} failed!")
+        if quiet:
+            print(result.stderr or result.stdout)
         sys.exit(1)
 
 def main():
@@ -122,8 +128,14 @@ def main():
             "redis_replicas_per_master": args.replicas_per_master,
         })
     elif args.command == "status":
-        print("Fetching cluster status...")
-        run_playbook("status.yml")
+        print("Fetching cluster status...\n")
+        run_playbook("status.yml", quiet=True)
+        try:
+            with open("/tmp/cluster_status.txt", "r") as f:
+                status_text = f.read()
+            print(f"\033[92m{status_text}\033[0m")
+        except FileNotFoundError:
+            print("\033[91m[ERROR] Could not read cluster status.\033[0m")
     elif args.command == "data":
         if args.data_command == "seed":
             print(f"Seeding {args.keys} keys...")

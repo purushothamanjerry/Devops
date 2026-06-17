@@ -72,18 +72,24 @@
                       'master': master_addr, 'mem': mem
                   })
 
+          masters.sort(key=lambda x: x['addr'])
+          replicas.sort(key=lambda x: x['addr'])
+
           print(f"Cluster State: {state}\n")
           print("MASTERS")
           for m in masters:
-              print(f"  {m['addr']}  [master]  v{m['ver']}  slots: {m['slots']}  keys: {m['keys']}  mem: {m['mem']}")
+              print(f"  {m['addr']:<15}  [master]  v{m['ver']:<7}  slots: {m['slots']:<11} keys: {m['keys']:<4} mem: {m['mem']}")
           print("\nREPLICAS")
           for r in replicas:
-              print(f"  {r['addr']}  [replica]  v{r['ver']}  replicating: {r['master']}  mem: {r['mem']}")
+              print(f"  {r['addr']:<15}  [replica] v{r['ver']:<7}  replicating: {r['master']:<15} mem: {r['mem']}")
 
     - name: Run status script
       command: python3 /tmp/status.py
       register: status_out
 
-    - name: Print status
-      debug:
-        msg: "{{ status_out.stdout }}"
+    - name: Save status output locally
+      delegate_to: localhost
+      become: no
+      copy:
+        content: "{{ status_out.stdout }}"
+        dest: /tmp/cluster_status.txt

@@ -1,3 +1,4 @@
+# pyrefly: ignore [missing-import]
 from ansible.plugins.callback import CallbackBase
 import json
 import datetime
