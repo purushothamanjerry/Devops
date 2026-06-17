@@ -93,7 +93,7 @@ Progress is printed after each node: `[X/6] Upgraded <role> <hostname> (<ip>) �
 
 ## Idempotency
 
-- `provision` checks the installed Redis version before compiling. If the target version is already installed, it skips download, compile, and data wipe — only reapplying config and restarting Redis. Cluster formation is skipped if the cluster already exists.
+- `provision` checks if Redis is already installed during pre-flight checks. If it is already provisioned, it treats the entire provisioning process as a no-op and exits immediately.
 - `upgrade` checks each node's version before upgrading. Nodes already at the target version are skipped. Running upgrade when all nodes are at the target version exits with a clear message.
 
 ## Assumptions and Trade-offs
@@ -102,7 +102,7 @@ Progress is printed after each node: `[X/6] Upgraded <role> <hostname> (<ip>) �
 - Containers use port mapping (2221–2226) for SSH access from the host
 - `cluster-announce-ip` is set per node to ensure correct IP advertisement within the container network
 - No systemd in containers — Redis started via `nohup` (systemd unit file is present in the role but unused in this environment)
-- Data is only cleared on provision when the version changes
+- Data is only cleared on the initial provision
 - Data seeding uses deterministic SHA256 hashes (`key:XXXX` → `sha256(key:XXXX)`) for reproducible verification
 
 ## Known Limitations
