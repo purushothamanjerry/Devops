@@ -26,4 +26,4 @@ class CallbackModule(CallbackBase):
         self._display.display(f"\n\033[91m[UNREACHABLE] {result._host.get_name()}\033[0m")
 
     def v2_playbook_on_stats(self, stats):
-        self._display.display("\033[92m✔ Done.\033[0m\n")
+        pass
