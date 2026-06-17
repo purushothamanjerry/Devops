@@ -129,13 +129,8 @@ def main():
         })
     elif args.command == "status":
         print("Fetching cluster status...\n")
-        run_playbook("status.yml", quiet=True)
-        try:
-            with open("/tmp/cluster_status.txt", "r") as f:
-                status_text = f.read()
-            print(f"\033[92m{status_text}\033[0m")
-        except FileNotFoundError:
-            print("\033[91m[ERROR] Could not read cluster status.\033[0m")
+        run_playbook("fix_replicas.yml")
+        run_playbook("status.yml")
     elif args.command == "data":
         if args.data_command == "seed":
             print(f"Seeding {args.keys} keys...")

@@ -61,3 +61,14 @@
       fail:
         msg: "Cluster formation failed! {{ final_check.stdout }}"
       when: "'cluster_state:ok' not in final_check.stdout"
+
+    - name: Enforce deterministic replica assignment (14->11, 15->12, 16->13)
+      shell: |
+        ID_11=$(/usr/local/bin/redis-cli -h 10.10.0.11 -p 6379 cluster nodes | grep 10.10.0.11: | awk '{print $1}')
+        ID_12=$(/usr/local/bin/redis-cli -h 10.10.0.12 -p 6379 cluster nodes | grep 10.10.0.12: | awk '{print $1}')
+        ID_13=$(/usr/local/bin/redis-cli -h 10.10.0.13 -p 6379 cluster nodes | grep 10.10.0.13: | awk '{print $1}')
+        
+        /usr/local/bin/redis-cli -h 10.10.0.14 -p 6379 cluster replicate $ID_11
+        /usr/local/bin/redis-cli -h 10.10.0.15 -p 6379 cluster replicate $ID_12
+        /usr/local/bin/redis-cli -h 10.10.0.16 -p 6379 cluster replicate $ID_13
+      when: "'cluster_known_nodes:1' in cluster_check.stdout"

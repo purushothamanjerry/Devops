@@ -87,9 +87,6 @@
       command: python3 /tmp/status.py
       register: status_out
 
-    - name: Save status output locally
-      delegate_to: localhost
-      become: no
-      copy:
-        content: "{{ status_out.stdout }}"
-        dest: /tmp/cluster_status.txt
+    - name: Print status
+      debug:
+        msg: "{{ status_out.stdout_lines }}"

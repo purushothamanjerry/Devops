@@ -1,0 +1,14 @@
+---
+- name: Fix replica assignments
+  hosts: redis-node-1
+  become: yes
+  tasks:
+    - name: Enforce deterministic replica assignment
+      shell: |
+        ID_11=$(/usr/local/bin/redis-cli -h 10.10.0.11 -p 6379 cluster nodes | grep 10.10.0.11: | awk '{print $1}')
+        ID_12=$(/usr/local/bin/redis-cli -h 10.10.0.12 -p 6379 cluster nodes | grep 10.10.0.12: | awk '{print $1}')
+        ID_13=$(/usr/local/bin/redis-cli -h 10.10.0.13 -p 6379 cluster nodes | grep 10.10.0.13: | awk '{print $1}')
+        
+        /usr/local/bin/redis-cli -h 10.10.0.14 -p 6379 cluster replicate $ID_11
+        /usr/local/bin/redis-cli -h 10.10.0.15 -p 6379 cluster replicate $ID_12
+        /usr/local/bin/redis-cli -h 10.10.0.16 -p 6379 cluster replicate $ID_13
