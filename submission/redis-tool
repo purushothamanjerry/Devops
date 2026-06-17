@@ -121,12 +121,13 @@ def main():
     check_prerequisites()
 
     if args.command == "provision":
-        print(f"Provisioning Redis Cluster v{args.version}...")
+        print(f"Provisioning Redis Cluster v{args.version}...\n")
         run_playbook("provision.yml", {
             "redis_version": args.version,
             "redis_masters": args.masters,
             "redis_replicas_per_master": args.replicas_per_master,
         })
+        print(f"\n\033[97mCluster successfully provisioned!\033[0m")
     elif args.command == "status":
         print("Fetching cluster status...\n")
         run_playbook("fix_replicas.yml")

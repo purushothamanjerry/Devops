@@ -40,22 +40,14 @@
       register: cluster_result
       when: "'cluster_known_nodes:1' in cluster_check.stdout"
 
-    - name: Print cluster formation result
-      debug:
-        msg: "{{ cluster_result.stdout | default('Cluster already formed — skipped') }}"
 
     - name: Wait for cluster to stabilize
-      pause:
-        seconds: 3
+      shell: sleep 3
 
     - name: Verify cluster state
       command: /usr/local/bin/redis-cli -p 6379 cluster info
       register: final_check
 
-    - name: Confirm cluster is healthy
-      debug:
-        msg: "Cluster formation complete — cluster_state:ok"
-      when: "'cluster_state:ok' in final_check.stdout"
 
     - name: Fail if cluster not ok
       fail:
@@ -72,3 +64,55 @@
         /usr/local/bin/redis-cli -h 10.10.0.15 -p 6379 cluster replicate $ID_12
         /usr/local/bin/redis-cli -h 10.10.0.16 -p 6379 cluster replicate $ID_13
       when: "'cluster_known_nodes:1' in cluster_check.stdout"
+
+    - name: Create Phase 1 topology script
+      copy:
+        dest: /tmp/topology.py
+        content: |
+          import subprocess
+          
+          def redis_cmd(*args):
+              r = subprocess.run(['/usr/local/bin/redis-cli'] + list(args), capture_output=True, text=True)
+              return r.stdout.strip()
+              
+          nodes_raw = redis_cmd('-p', '6379', 'cluster', 'nodes')
+          
+          masters = []
+          replicas = []
+          
+          for line in nodes_raw.strip().splitlines():
+              parts = line.split()
+              if len(parts) < 8: continue
+              
+              addr = parts[1].split('@')[0]
+              flags = parts[2]
+              master_id = parts[3]
+              link_state = parts[7]
+              slots = ' '.join(parts[8:]) if len(parts) > 8 else ''
+              
+              if 'master' in flags and 'slave' not in flags:
+                  masters.append({'addr': addr, 'link': link_state, 'slots': slots, 'id': parts[0]})
+              elif 'slave' in flags:
+                  master_addr = 'unknown'
+                  for l2 in nodes_raw.strip().splitlines():
+                      p2 = l2.split()
+                      if p2[0] == master_id:
+                          master_addr = p2[1].split('@')[0]
+                  replicas.append({'addr': addr, 'link': link_state, 'master': master_addr})
+                  
+          masters.sort(key=lambda x: x['addr'])
+          replicas.sort(key=lambda x: x['addr'])
+          
+          print("Cluster Topology:")
+          for m in masters:
+              print(f"  {m['addr']:<15}  [master]  status: {m['link']:<10} slots: {m['slots']}")
+          for r in replicas:
+              print(f"  {r['addr']:<15}  [replica] status: {r['link']:<10} replicating: {r['master']}")
+
+    - name: Run topology script
+      command: python3 /tmp/topology.py
+      register: topo_out
+
+    - name: Print final cluster topology
+      debug:
+        msg: "{{ topo_out.stdout_lines }}"

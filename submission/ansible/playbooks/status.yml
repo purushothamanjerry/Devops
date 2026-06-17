@@ -39,6 +39,8 @@
               flags     = parts[2]
               master_id = parts[3]
 
+              link_state = parts[7]
+
               # Get slot ranges (fields 8+)
               slots = ' '.join(parts[8:]) if len(parts) > 8 else ''
 
@@ -58,7 +60,8 @@
                   key_count = redis_cmd('-h', ip, '-p', port, 'dbsize')
                   masters.append({
                       'addr': addr, 'ver': ver, 'slots': slots,
-                      'keys': key_count, 'mem': mem, 'id': node_id
+                      'keys': key_count, 'mem': mem, 'id': node_id,
+                      'link': link_state
                   })
               elif 'slave' in flags:
                   # find master addr
@@ -69,7 +72,8 @@
                           master_addr = p2[1].split('@')[0]
                   replicas.append({
                       'addr': addr, 'ver': ver,
-                      'master': master_addr, 'mem': mem
+                      'master': master_addr, 'mem': mem,
+                      'link': link_state
                   })
 
           masters.sort(key=lambda x: x['addr'])
@@ -78,10 +82,10 @@
           print(f"Cluster State: {state}\n")
           print("MASTERS")
           for m in masters:
-              print(f"  {m['addr']:<15}  [master]  v{m['ver']:<7}  slots: {m['slots']:<11} keys: {m['keys']:<4} mem: {m['mem']}")
+              print(f"  {m['addr']:<15}  [master]  v{m['ver']:<7}  status: {m['link']:<10} slots: {m['slots']:<11} keys: {m['keys']:<4} mem: {m['mem']}")
           print("\nREPLICAS")
           for r in replicas:
-              print(f"  {r['addr']:<15}  [replica] v{r['ver']:<7}  replicating: {r['master']:<15} mem: {r['mem']}")
+              print(f"  {r['addr']:<15}  [replica] v{r['ver']:<7}  status: {r['link']:<10} replicating: {r['master']:<15} mem: {r['mem']}")
 
     - name: Run status script
       command: python3 /tmp/status.py

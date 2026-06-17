@@ -23,9 +23,6 @@
   failed_when: false
   changed_when: false
 
-- name: Show current version
-  debug:
-    msg: "Current Redis: {{ redis_installed.stdout | default('not installed') }}"
 
 - name: Parse installed version
   set_fact:
@@ -59,9 +56,6 @@
   command: /usr/local/bin/redis-server --version
   register: new_version
 
-- name: Show new version
-  debug:
-    msg: "Installed Redis: {{ new_version.stdout }}"
 
 - name: Deploy redis.conf
   template:
